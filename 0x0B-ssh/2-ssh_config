@@ -1,4 +1,3 @@
-include /etc/ssh/ssh_config.d/*.conf
 Host *
 #   ForwardAgent no
 #   ForwardX11 no
@@ -41,5 +40,3 @@ Host *
     HashKnownHosts yes
     GSSAPIAuthentication yes
     GSSAPIDelegateCredentials no
-:wq!
-
