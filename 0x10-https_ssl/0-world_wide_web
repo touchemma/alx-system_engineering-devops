@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# usage: ./1-0-world_wide_web <domains> <subdomains>
+# display info about  subdomains
+
+# function to retrieve and display inf about a subdomains
+domain_information () {
+    # perform DNS lookup for the subdomain under the specified domain
+    line=$(dig "$2","$1" | grep -A1 'ANSWER SECTION:' | tr '\tr' '/n' | tail -2 | tr '\n' '')
+    # extrract important info and print it
+    echo "$2 $line" | awk '{print "the subdomain" $1 " is a " $2 " record and points to " $3}' 
+  }
+  
+  # check the number of arguments passed to the script
+  if [ "s# == 1 ]
+  then
+     # if there is only one argument
+     # call the domain_info function with predefined subdomain names
+     domain_information "$1" "www"
+     domain_information "$1" "lb-01"
+     domain_information "$1" "web-01"
+     domain_information "$1" "web-02"
+  elif [ "s# == 2 ]
+  then
+     # if rhere are wo arguments, call the domain_information \
+     # functionwith the provided subdomain name
+     domain_information "$1" "$2"
+  fi
