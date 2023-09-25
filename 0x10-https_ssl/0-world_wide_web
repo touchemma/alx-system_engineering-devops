@@ -1,35 +1,16 @@
-#!/bin/env bash
-# Function to display subdomain information
-display_info() {
-  local domain="$1"
-  local subdomain="$2"
+#!/usr/bin/env bash
+# print domains and subdomains
 
-  # Define subdomains and their corresponding IP addresses
-  declare -A subdomains
-  subdomains["www"]="lb-01"
-  subdomains["lb-01"]="lb-01"
-  subdomains["web-01"]="web-01"
-  subdomains["web-02"]="web-02"
-
-  # Check if the provided subdomain is in the list
-  if [ -n "$subdomain" ] && [ -n "${subdomains[$subdomain]}" ]; then
-    echo "The subdomain $subdomain is a A record and points to ${subdomains[$subdomain]} IP address."
-  else
-    for sub in "${!subdomains[@]}"; do
-      echo "The subdomain $sub is a A record and points to ${subdomains[$sub]} IP address."
-    done
-  fi
+print_domain_subdomain () {
+    dig "$1" | grep -A1 'ANSWER SECTION:' | sed -r "s/$1./$2/g" | awk -F" " ' NR==2 { print "The subdomain " $1 " is a " $4 " record and points to " $5 }'
 }
 
-# Check the number of arguments
-if [ $# -lt 1 ]; then
-  echo "Usage: $0 DOMAIN [SUBDOMAIN]"
-  exit 1
+if [ "$#" -eq 2 ]
+then
+    print_domain_subdomain "$2.$1" "$2"
+else
+    print_domain_subdomain "www.$1" "www"
+    print_domain_subdomain "lb-01.$1" "lb-01"
+    print_domain_subdomain "web-01.$1" "web-01"
+    print_domain_subdomain "web-02.$1" "web-02"
 fi
-
-# Assign the domain and subdomain from arguments
-domain="yourdelight.tech"
-subdomain="$2"
-
-# Call the display_info function
-display_info "$domain" "$subdomain"
