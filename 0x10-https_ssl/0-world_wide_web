@@ -1,38 +1,35 @@
-P addresses for your subdomains
-declare -A subdomains
-subdomains["web-01"]="52.90.22.175"
-subdomains["web-02"]="107.22.142.79"
-subdomains["lb-01"]="100.26.233.183"
-subdomains["www"]="100.26.233.183"
+#!/bin/env bash
+# Function to display subdomain information
+display_info() {
+  local domain="$1"
+  local subdomain="$2"
 
-# Check if the correct number of arguments is provided
-if [ $# -lt 4 ]; then
-  echo "Usage: $0 SUBDOMAIN PATH_TO_FILE USERNAME PATH_TO_SSH_KEY"
+  # Define subdomains and their corresponding IP addresses
+  declare -A subdomains
+  subdomains["www"]="lb-01"
+  subdomains["lb-01"]="lb-01"
+  subdomains["web-01"]="web-01"
+  subdomains["web-02"]="web-02"
+
+  # Check if the provided subdomain is in the list
+  if [ -n "$subdomain" ] && [ -n "${subdomains[$subdomain]}" ]; then
+    echo "The subdomain $subdomain is a A record and points to ${subdomains[$subdomain]} IP address."
+  else
+    for sub in "${!subdomains[@]}"; do
+      echo "The subdomain $sub is a A record and points to ${subdomains[$sub]} IP address."
+    done
+  fi
+}
+
+# Check the number of arguments
+if [ $# -lt 1 ]; then
+  echo "Usage: $0 DOMAIN [SUBDOMAIN]"
   exit 1
 fi
 
-# Get the subdomain from the command-line argument
-subdomain=$1
+# Assign the domain and subdomain from arguments
+domain="yourdelight.tech"
+subdomain="$2"
 
-# Check if the subdomain exists in the array
-if [ -z "${subdomains[$subdomain]}" ]; then
-  echo "Invalid subdomain. Available subdomains: web-01, web-02, lb-01, www"
-  exit 1
-fi
-
-# Assign other arguments to variables
-path_to_file=$2
-username=$3
-path_to_ssh_key=$4
-ip=${subdomains[$subdomain]}
-
-# Disable Strict Host Key checking
-scp -o "StrictHostKeyChecking no" -i "$path_to_ssh_key" "$path_to_file" "$username@$ip:~/"
-
-# Check if the transfer was successful
-if [ $? -eq 0 ]; then
-  echo "FILE TRANSFER WAS SUCCESSFUL"
-else
-  echo "FILE TRANSFER FAILED"
-fi
-
+# Call the display_info function
+display_info "$domain" "$subdomain"
