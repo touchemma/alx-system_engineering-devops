@@ -29,7 +29,7 @@ cp /var/www/html/index.nginx-debian.html /var/www/html/index.nginx-debian.html.b
 # Creating new index
 echo -e "Hello World!" > /var/www/html/index.nginx-debian.html
 # Setting up /redirect_me to a youtube video
-sudo sed -i '24i\	rewrite ^/redirect_me https://www.youtube.com/watch?v=rh25BVRziuA permanent;' /etc/nginx/sites-available/default
+sudo sed -i '24i\	rewrite ^/redirect_me https://www.linkedin.com/feed/update/urn:li:activity:7109297330616463360/  permanent;' /etc/nginx/sites-available/default
 
 # Set up a 404 page
 echo "Ceci n'est pas une page" >> /var/www/html/error_404.html
