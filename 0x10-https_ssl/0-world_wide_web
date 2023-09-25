@@ -1,16 +1,38 @@
-#!/usr/bin/env bash
-# configure my domain zone so that the subdomain www points to load balancer
+P addresses for your subdomains
+declare -A subdomains
+subdomains["web-01"]="52.90.22.175"
+subdomains["web-02"]="107.22.142.79"
+subdomains["lb-01"]="100.26.233.183"
+subdomains["www"]="100.26.233.183"
 
-func()
-{
-    if [ $# -eq 2 ]; then
-	dig "$2.$1" | grep -A1 'ANSWER SECTION:' | tail -n 1 | awk '{split($1, spl, ".")} {printf "The subdomain %s is a %s record and points to %s\n",spl[1],$4,$5}'
-    elif [ $# -eq 1 ]; then
-	for sub in 'www' 'lb-01' 'web-01' 'web-02'; do
-	    fdqn=$sub.$1
-	    dig "$fdqn" | grep -A1 'ANSWER SECTION:' | tail -n 1 | awk '{split($1, spl, ".")} {printf "The subdomain %s is a %s record and points to %s\n",spl[1],$4,$5}'
-	done
-    fi
-}
+# Check if the correct number of arguments is provided
+if [ $# -lt 4 ]; then
+  echo "Usage: $0 SUBDOMAIN PATH_TO_FILE USERNAME PATH_TO_SSH_KEY"
+  exit 1
+fi
 
-func "$@"
+# Get the subdomain from the command-line argument
+subdomain=$1
+
+# Check if the subdomain exists in the array
+if [ -z "${subdomains[$subdomain]}" ]; then
+  echo "Invalid subdomain. Available subdomains: web-01, web-02, lb-01, www"
+  exit 1
+fi
+
+# Assign other arguments to variables
+path_to_file=$2
+username=$3
+path_to_ssh_key=$4
+ip=${subdomains[$subdomain]}
+
+# Disable Strict Host Key checking
+scp -o "StrictHostKeyChecking no" -i "$path_to_ssh_key" "$path_to_file" "$username@$ip:~/"
+
+# Check if the transfer was successful
+if [ $? -eq 0 ]; then
+  echo "FILE TRANSFER WAS SUCCESSFUL"
+else
+  echo "FILE TRANSFER FAILED"
+fi
+
